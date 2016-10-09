@@ -1,0 +1,14 @@
+{application, emock,
+ [
+  {description, "An extensible http server mock"},
+  {vsn, "0.1"},
+  {registered, []},
+  {applications, [
+      kernel,
+      stdlib,
+      crypto,
+      cowboy
+  ]},
+  {mod, {emock_app, []}},
+  {env, []}
+ ]}.
