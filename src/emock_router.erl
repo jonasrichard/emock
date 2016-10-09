@@ -14,6 +14,12 @@
          }).
 
 start_link() ->
+    Dispatch = cowboy_router:compile([
+                                      {'_', [{'_', emock_handler, []}]}
+                                     ]),
+    {ok, _Pid} = cowboy:start_clear(emock_http, 5,
+                                    [{port, 8080}],
+                                    #{env => #{dispatch => Dispatch}}),
     gen_server:start_link({local, ?MODULE}, ?MODULE, [], []).
 
 init(_) ->
