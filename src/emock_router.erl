@@ -14,12 +14,14 @@
          }).
 
 start_link() ->
-    %%Port = application:get_env(
+    Port = emock_config:sub_value(cowboy, port, 8080),
+    Listeners = emock_config:sub_value(cowboy, listeners, 10),
     Dispatch = cowboy_router:compile([
                                       {'_', [{'_', emock_handler, []}]}
                                      ]),
-    {ok, _Pid} = cowboy:start_clear(emock_http, 5,
-                                    [{port, 8080}],
+    {ok, _Pid} = cowboy:start_clear(emock_http,
+                                    Listeners,
+                                    [{port, Port}],
                                     #{env => #{dispatch => Dispatch}}),
     gen_server:start_link({local, ?MODULE}, ?MODULE, [], []).
 

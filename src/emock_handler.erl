@@ -3,9 +3,10 @@
 -export([init/2]).
 
 init(Req, Opts) ->
-    {ok, Req2} = cowboy_req:reply(200,
-                                  #{<<"content-type">> => <<"text/plain">>},
-                                  <<"Hello World!">>,
-                                  Req),
+    lager:debug("Req is ~p", [Req]),
+    Req2 = cowboy_req:reply(200,
+                            #{<<"content-type">> => <<"text/plain">>},
+                            <<"Hello World!">>,
+                            Req),
     {ok, Req2, Opts}.
 

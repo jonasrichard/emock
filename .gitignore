@@ -3,8 +3,11 @@ deps
 *.o
 *.beam
 *.plt
+*.swp
 erl_crash.dump
 ebin
-rel/example_project
-.concrete/DEV_MODE
+_build
 .rebar
+rebar.lock
+rebar3
+log
