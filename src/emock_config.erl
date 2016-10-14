@@ -3,7 +3,8 @@
 -export([value/1,
          value/2,
          sub_value/2,
-         sub_value/3
+         sub_value/3,
+         all/0
          ]).
 
 value(Par) ->
@@ -42,4 +43,7 @@ sub_value(Par, SubPar, Def) ->
         Value ->
             Value
     end.
+
+all() ->
+    application:get_all_env(emock).
 

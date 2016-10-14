@@ -17,8 +17,8 @@ start_link() ->
     Port = emock_config:sub_value(cowboy, port, 8080),
     Listeners = emock_config:sub_value(cowboy, listeners, 10),
     Dispatch = cowboy_router:compile([
-                                      {'_', [{'_', emock_handler, []}]}
-                                     ]),
+                    {'_', [{'_', emock_handler, emock_config:all()}]}
+                ]),
     {ok, _Pid} = cowboy:start_clear(emock_http,
                                     Listeners,
                                     [{port, Port}],
