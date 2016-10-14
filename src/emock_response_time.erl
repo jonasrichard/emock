@@ -1,18 +1,18 @@
 -module(emock_response_time).
 
--export([execute/3]).
+-export([execute/1]).
 
-execute(_Req, Opts, State) ->
-    case lists:keyfind(response_time, 1, Opts) of
-        false ->
-            {ok, State};
-        {_, Config} ->
-            sleep(Config),
+execute(State) ->
+    case emock_utils:config(State, mock_rest) of
+        undefined ->
+            {stop, emock_utils:reply(State, 404)};
+        Opts ->
+            sleep(Opts),
             {ok, State}
     end.
 
-sleep(Config) ->
-    case lists:keyfind(normal, 1, Config) of
+sleep(Opts) ->
+    case lists:keyfind(normal, 1, Opts) of
         false ->
             ok;
         {normal, {_Min, Max}} ->

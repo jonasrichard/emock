@@ -1,7 +1,7 @@
 -module(emock_rest_db).
 
--export([execute/3]).
+-export([execute/1]).
 
-execute(Req, Opts, State) ->
+execute(State) ->
     {ok, State}.
 

@@ -6,10 +6,6 @@ init(Req, Opts) ->
     lager:debug("Req is ~p", [Req]),
     lager:debug("Opts is ~p", [Opts]),
     Req2 = execute_hooks(Req, Opts),
-    %Req2 = cowboy_req:reply(200,
-    %                        #{<<"content-type">> => <<"text/plain">>},
-    %                        <<"Hello World!">>,
-    %                        Req),
     {ok, Req2, Opts}.
 
 execute_hooks(Req, Opts) ->
@@ -22,14 +18,14 @@ execute_hooks(Req, Opts) ->
     end.
 
 execute_hooks(Req, Opts, Hooks) ->
-    iterate_hooks(Req, Opts, Hooks, #{}).
+    iterate_hooks(Hooks, #{request => Req, opts => Opts}).
 
-iterate_hooks(_Req, _Opts, [], State) ->
+iterate_hooks([], State) ->
     State;
-iterate_hooks(Req, Opts, [Hook | Rest], State) ->
-    case Hook:execute(Req, Opts, State) of
+iterate_hooks([Hook | Rest], State) ->
+    case Hook:execute(State) of
         {ok, State2} ->
-            iterate_hooks(Req, Opts, Rest, State2);
+            iterate_hooks(Rest, State2);
         {stop, State2} ->
             State2
     end.
