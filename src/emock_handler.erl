@@ -8,22 +8,15 @@ init(Req, Opts) ->
     Req2 = execute_hooks(Req, Opts),
     {ok, Req2, Opts}.
 
-execute_hooks(Req, Opts) ->
-    case lists:keyfind(hooks, 1, Opts) of
-        false ->
-            default_reply;
-        {_, Hooks} ->
-            State = execute_hooks(Req, Opts, Hooks),
-            response(Req, State)
-    end.
-
-execute_hooks(Req, Opts, Hooks) ->
-    iterate_hooks(Hooks, #{request => Req, opts => Opts}).
+execute_hooks(Req, #{hooks := Hooks}) ->
+    State = iterate_hooks(Hooks, #{request => Req}),
+    response(Req, State).
 
 iterate_hooks([], State) ->
     State;
 iterate_hooks([Hook | Rest], State) ->
-    case Hook:execute(State) of
+    Config = emock_router:config(Hook),
+    case Hook:execute(State, Config) of
         {ok, State2} ->
             iterate_hooks(Rest, State2);
         {stop, State2} ->

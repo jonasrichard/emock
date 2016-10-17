@@ -1,45 +1,45 @@
 -module(emock_router).
--behaviour(gen_server).
 
--export([start_link/0]).
-
--export([init/1,
-         handle_info/2,
-         handle_call/3,
-         handle_cast/2,
-         terminate/2,
-         code_change/3]).
-
--record(state, {
-         }).
+-export([start_link/0,
+         config/1]).
 
 start_link() ->
     Port = emock_config:sub_value(cowboy, port, 8080),
     Listeners = emock_config:sub_value(cowboy, listeners, 10),
+    Hooks = emock_config:value(hooks),
+    configure_hooks(Hooks),
     Dispatch = cowboy_router:compile([
-                    {'_', [{'_', emock_handler, emock_config:all()}]}
+                    {'_', [{'_', emock_handler, #{hooks => Hooks}}]}
                 ]),
     {ok, _Pid} = cowboy:start_clear(emock_http,
                                     Listeners,
                                     [{port, Port}],
-                                    #{env => #{dispatch => Dispatch}}),
-    gen_server:start_link({local, ?MODULE}, ?MODULE, [], []).
+                                    #{env => #{dispatch => Dispatch}}).
 
-init(_) ->
-    {ok, #state{}}.
+config(Module) ->
+    case ets:lookup(emock_config, Module) of
+        [] ->
+            undefined;
+        [{_, Config}] ->
+            Config
+    end.
 
-handle_info(_Message, State) ->
-    {noreply, State}.
+%%%
+%%% Internal functions
+%%%
 
-handle_cast(_Request, State) ->
-    {noreply, State}.
+configure_hooks(Hooks) ->
+    ets:new(emock_config, [set, named_table, {read_concurrency, true}]),
 
-handle_call(_Request, _From, State) ->
-    {reply, ok, State}.
+    lists:foreach(fun configure_hook/1, Hooks).
 
-terminate(_Reason, _State) ->
-    ok.
-
-code_change(_OldVsn, State, _Extra) ->
-    {ok, State}.
+configure_hook(Hook) ->
+    Config = emock_config:value(Hook),
+    NewConfig = case erlang:function_exported(Hook, config, 1) of
+                    true ->
+                        Hook:config(Config);
+                    false ->
+                        Config
+                end,
+    ets:insert(emock_config, {Hook, NewConfig}).
 

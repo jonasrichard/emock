@@ -1,18 +1,23 @@
 -module(emock_rest).
 
--export([execute/1]).
+-export([config/1,
+         execute/2]).
 
-execute(State) ->
-    case emock_utils:config(State, mock_rest) of
-        undefined ->
-            {stop, emock_utils:reply(State, 404)};
-        Opts ->
-            #{request := Req} = State,
-            {ok, do_reply(Req, Opts, State)}
-    end.
+config(Config) ->
+    lists:map(
+      fun({Path, Method, ContentType, Body}) ->
+              {list_to_binary(Path),
+               list_to_binary(Method),
+               list_to_binary(ContentType),
+               list_to_binary(Body)}
+      end, Config).
 
-do_reply(Req, Opts, State) ->
-    case match_urls(Req, Opts) of
+execute(State, Config) ->
+    #{request := Req} = State,
+    {ok, do_reply(Req, Config, State)}.
+
+do_reply(Req, Config, State) ->
+    case match_urls(Req, Config) of
         undefined ->
             emock_utils:reply(State, 404);
         {ContentType, Body} ->
