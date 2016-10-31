@@ -19,7 +19,10 @@ execute(State, Config) ->
 do_reply(Req, Config, State) ->
     case match_urls(Req, Config) of
         undefined ->
-            emock_utils:reply(State, 404);
+            %% TODO: do prefix match here, because some requests are
+            %% not concerning us!
+            %emock_utils:reply(State, 404);
+            State;
         {ContentType, Body} ->
             emock_utils:reply(State, ContentType, Body)
     end.
